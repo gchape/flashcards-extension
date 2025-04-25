@@ -19,10 +19,10 @@
 
 .button--go-to-next-day {
   composes: button;
-  background-color: #3b82f6;
+  background-color: #2563eb;
 }
 .button--go-to-next-day:hover {
-  background-color: #2563eb;
+  background-color: #4f46e5;
 }
 .button--go-to-next-day:active {
   transform: scale(0.98);

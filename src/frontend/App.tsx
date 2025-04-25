@@ -1,14 +1,18 @@
+import { useState } from "react";
 import FlashcardsContextProvider from "../backend/store/flashcards-context";
 import Button from "./components/Button";
+import Main from "./components/Main";
+import Header from "./components/Header";
 
 function App() {
+  const [day, setDay] = useState(0);
+
   return (
     <FlashcardsContextProvider>
-      <Button className="go-to-next-day" text="Go to Next Day" />
-      <Button className="clear" text="Clear" />
-      <Button className="save" text="Save Card" />
-      <Button className="get-hint" text="Save Card" />
-      <Button className="show-answer" text="Save Card" />
+      <Main>
+        <Header day={day} />
+        <Button className="go-to-next-day" text="Go to Next Day" />
+      </Main>
     </FlashcardsContextProvider>
   );
 }
