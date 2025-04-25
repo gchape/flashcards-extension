@@ -8,7 +8,13 @@ const Context = createContext<FlashcardsContext | null>(null);
 function initialState(): BucketMap {
   const flashcards = new Map<number, Set<Flashcard>>();
 
-  // TODO (add initial cards)
+  const initialCards = [
+    new Flashcard("What is the capital of France?", "Paris", "It's known as the city of light"),
+    new Flashcard("Who wrote '1984'?", "George Orwell", "A famous dystopian novel"),
+    new Flashcard("What is the boiling point of water (in Celsius)?", "100", "Standard pressure"),
+  ];
+
+  flashcards.set(0, new Set(initialCards));
 
   return flashcards;
 }
