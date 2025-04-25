@@ -1,20 +1,9 @@
 import { createContext, ReactNode, useContext } from "react";
 import { update } from "../../logic/algorithm";
-import { AnswerDifficulty, BucketMap, Flashcard } from "../../logic/flashcards";
+import { FlashcardsContext } from "./types";
+import { BucketMap, Flashcard } from "../../logic/flashcards";
 
-type FlashcardsState = {
-  flashcards: BucketMap;
-};
-
-type FlashcardsContextValue = FlashcardsState & {
-  update: (
-    buckets: BucketMap,
-    card: Flashcard,
-    difficulty: AnswerDifficulty
-  ) => BucketMap;
-};
-
-const FlashcardsContext = createContext<FlashcardsContextValue | null>(null);
+const Context = createContext<FlashcardsContext | null>(null);
 
 function initialState(): BucketMap {
   const flashcards = new Map<number, Set<Flashcard>>();
@@ -29,20 +18,18 @@ export default function FlashcardsContextProvider({
 }: {
   children: ReactNode;
 }) {
-  const ctx: FlashcardsContextValue = {
+  const flashcardsContext: FlashcardsContext = {
     flashcards: initialState(),
     update: update,
   };
 
   return (
-    <FlashcardsContext.Provider value={ctx}>
-      {children}
-    </FlashcardsContext.Provider>
+    <Context.Provider value={flashcardsContext}>{children}</Context.Provider>
   );
 }
 
 export function useFlashcardsContext() {
-  const flashcardsContext = useContext(FlashcardsContext);
+  const flashcardsContext = useContext(Context);
 
   if (flashcardsContext === null) {
     throw new Error("Context must be used within a FlashcardsContextProvider");
