@@ -3,12 +3,16 @@ import styles from "./Button.module.css";
 
 interface ButtonProps extends ComponentPropsWithoutRef<"button"> {
   text: string;
-  className?: string;
+  className: "go-to-next-day" | "save" | "clear" | "get-hint" | "show-answer";
 }
 
 export default function Button({ text, className, ...props }: ButtonProps) {
   return (
-    <button className={className} style={styles} {...props}>
+    <button
+      className={styles[`button--${className}`]}
+      style={styles}
+      {...props}
+    >
       {text}
     </button>
   );
