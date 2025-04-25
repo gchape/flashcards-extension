@@ -1,5 +1,5 @@
 import { createContext, ReactNode, useContext } from "react";
-import { update } from "../../logic/algorithm";
+import { practice, update } from "../../logic/algorithm";
 import { FlashcardsContext } from "./types";
 import { BucketMap, Flashcard } from "../../logic/flashcards";
 
@@ -41,6 +41,7 @@ export default function FlashcardsContextProvider({
   const flashcardsContext: FlashcardsContext = {
     flashcards: initialState(),
     update: update,
+    practice: practice,
   };
 
   return (
