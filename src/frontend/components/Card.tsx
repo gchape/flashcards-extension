@@ -7,12 +7,14 @@ import styles from "./css/Card.module.css";
 type FlashcardProps = {
   day: number;
   showAnswer: boolean;
+  currentCard: React.RefObject<Record<number, Flashcard>>;
   setCurrentCardsCount: React.Dispatch<React.SetStateAction<number>>;
 };
 
 export default function Card({
   day,
   showAnswer,
+  currentCard,
   setCurrentCardsCount,
 }: FlashcardProps) {
   const hasMounted = useRef(false);
@@ -58,7 +60,7 @@ export default function Card({
     );
   }
 
-  const currentCard = todayCards[index];
+  currentCard.current[0] = todayCards[index];
   return (
     <div className={styles["wrapper"]}>
       <p className={styles["counter"]}>
@@ -66,11 +68,11 @@ export default function Card({
       </p>
       {!showAnswer ? (
         <div className={styles["card"]}>
-          <p>🤔 {currentCard?.front}</p>
+          <p>🤔 {currentCard.current[0]?.front}</p>
         </div>
       ) : (
         <div className={styles["card--answer"]}>
-          <p>💡 {currentCard?.back}</p>
+          <p>💡 {currentCard.current[0]?.back}</p>
         </div>
       )}
     </div>
