@@ -58,3 +58,22 @@ Representation Invariant (RI):
 
 // TODO: Maybe later add createdAt timestamp?
 // TODO: Support markdown in front/back? (stretch goal)
+
+
+
+
+// Wrapper to create a Flashcard instance.
+// Keeps things cleaner wherever we’re generating new cards (especially outside the class file).
+// Feeds straight into the Flashcard constructor, which handles trimming + validation.
+
+// Note: throws if front/back are missing or any tag/hint is off,
+// so whoever’s calling this should probably catch errors if needed.
+export function createFlashcard(
+  front: string,
+  back: string,
+  hint?: string,
+  tags: string[] = []
+): Flashcard {
+  return new Flashcard(front, back, hint, tags); // pretty much just passes through for now
+}
+
