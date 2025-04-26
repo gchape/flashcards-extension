@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Add Flashcard</title>
+    <link rel="stylesheet" href="./popup/popup.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="title">Add Flashcard</h1>
+      <form id="add-card-form">
+        <label for="front">Front</label>
+        <input type="text" id="front" name="front" required />
+
+        <label for="back">Back</label>
+        <input type="text" id="back" name="back" required />
+
+        <label for="hint">Hint (optional)</label>
+        <input type="text" id="hint" name="hint" />
+
+        <label for="tags">Tags (comma-separated)</label>
+        <input type="text" id="tags" name="tags" />
+
+        <button type="submit" class="button button--save">Add Card</button>
+      </form>
+    </div>
+
+    <script src="./popup/popup.js"></script>
+  </body>
+</html>
