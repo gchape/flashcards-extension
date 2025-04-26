@@ -1,16 +1,13 @@
 {
   "manifest_version": 3,
-  "name": "Flashcards",
+  "name": "Flashcard Adder",
   "version": "1.0",
-  "description": "A flashcard app with gesture-based rating",
-  "permissions": ["storage", "activeTab", "scripting"],
-  "action": {
-    "default_popup": "index.html",
-    "default_icon": {
-      "512": "icons/icon512.png"
-    }
+  "permissions": ["storage", "scripting", "activeTab"],
+  "host_permissions": ["http://localhost:5173/*"],
+  "background": {
+    "service_worker": "background.js"
   },
-  "icons": {
-    "512": "icons/icon512.png"
+  "action": {
+    "default_popup": "popup.html"
   }
 }
