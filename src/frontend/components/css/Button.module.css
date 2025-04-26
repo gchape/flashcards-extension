@@ -1,0 +1,95 @@
+.button {
+  width: 140px;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  padding: 0 16px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-align: center;
+  color: #fff;
+  background-color: #555;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease, transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.button:hover {
+  transform: scale(1.03);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.button:active {
+  transform: scale(0.96);
+}
+
+.button:focus-visible {
+  outline: 2px solid #93c5fd;
+  outline-offset: 3px;
+}
+
+/* Variants using composes */
+.button--go-to-next-day {
+  composes: button;
+  background-color: #2563eb;
+}
+.button--go-to-next-day:hover {
+  background-color: #1e40af;
+}
+
+.button--save {
+  composes: button;
+  background-color: #10b981;
+}
+.button--save:hover {
+  background-color: #047857;
+}
+
+.button--clear {
+  composes: button;
+  background-color: #ef4444;
+}
+.button--clear:hover {
+  background-color: #b91c1c;
+}
+
+.button--get-hint {
+  composes: button;
+  background-color: #f59e0b;
+}
+.button--get-hint:hover {
+  background-color: #b45309;
+}
+
+.button--show-answer {
+  composes: button;
+  background-color: #8b5cf6;
+}
+.button--show-answer:hover {
+  background-color: #6d28d9;
+}
+
+.button--easy {
+  composes: button;
+  background-color: #22c55e;
+}
+.button--easy:hover {
+  background-color: #15803d;
+}
+
+.button--hard {
+  composes: button;
+  background-color: #ec4899;
+}
+.button--hard:hover {
+  background-color: #be185d;
+}
+
+.button--wrong {
+  composes: button;
+  background-color: #f87171;
+}
+.button--wrong:hover {
+  background-color: #dc2626;
+}

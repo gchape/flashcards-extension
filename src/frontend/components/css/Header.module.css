@@ -1,0 +1,25 @@
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.header h1 {
+  color: #4f46e5;
+  font-weight: 400;
+  font-size: 2rem;
+  margin: 0;
+}
+
+.header p {
+  font-size: 0.8rem;
+  font-weight: 500;
+  width: 100%;
+  text-align: center;
+  margin: 1px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background-color: #4f46e5;
+  color: white;
+}

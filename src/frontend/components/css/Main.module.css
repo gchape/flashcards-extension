@@ -1,0 +1,20 @@
+main {
+  min-width: 400px;
+  max-width: 500px;
+  min-height: 45vh;
+
+  padding: 10px 20px 20px 20px;
+  margin: auto;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+
+  border-radius: 8px;
+  background-color: whitesmoke;
+
+  /* light/white glow shadow */
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.1),
+    0 0 16px rgba(255, 255, 255, 0.08), 0 0 32px rgba(255, 255, 255, 0.06);
+}

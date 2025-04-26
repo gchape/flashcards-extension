@@ -1,5 +1,5 @@
 import { ComponentPropsWithoutRef } from "react";
-import styles from "./Main.module.css";
+import styles from "./css/Main.module.css";
 
 interface MainProps extends ComponentPropsWithoutRef<"main"> {}
 
