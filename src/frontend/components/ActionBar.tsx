@@ -1,3 +1,4 @@
+import { Flashcard } from "../../logic/flashcards";
 import Button from "./Button";
 import Footer from "./Footer";
 
@@ -5,12 +6,14 @@ type ActionBarProps = {
   showAnswer: boolean;
   currentCardsCount: number;
   setDay: React.Dispatch<React.SetStateAction<number>>;
+  currentCard: React.RefObject<Record<number, Flashcard>>;
   setShowAnswer: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export function ActionBar({
   setDay,
   showAnswer,
+  currentCard,
   setShowAnswer,
   currentCardsCount,
 }: ActionBarProps) {
@@ -28,7 +31,11 @@ export function ActionBar({
     </Footer>
   ) : (
     <div style={{ display: "flex", gap: "20px" }}>
-      <Button className="get-hint" text="Get Hint" />
+      <Button
+        className="get-hint"
+        text="Get Hint"
+        onClick={() => globalThis.alert(currentCard.current[0].hint)}
+      />
       <Button
         className="show-answer"
         text="Show Answer"
