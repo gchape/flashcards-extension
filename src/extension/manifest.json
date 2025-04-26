@@ -2,18 +2,19 @@
   "manifest_version": 3,
   "name": "Flashcards",
   "version": "1.0",
+  "description": "A flashcard app with gesture-based rating",
   "permissions": [],
   "host_permissions": ["http://localhost:5173/*"],
   "background": {
     "service_worker": "background.js"
   },
   "action": {
-    "default_popup": "popup.html",
+    "default_popup": "index.html",
     "default_icon": {
-      "512": "icons/icon512.jpg"
+      "512": "icons/icon512.png"
     }
   },
   "icons": {
-    "512": "icons/icon512.jpg"
+    "512": "icons/icon512.png"
   }
 }
