@@ -7,7 +7,7 @@ import { BucketMap, Flashcard } from "../../logic/flashcards";
 function initialState(): BucketMap {
   const flashcards = new Map<number, Set<Flashcard>>();
 
-  const initialCards = [
+  const initialCards: Array<Flashcard> = [
     new Flashcard(
       "What is the capital of France?",
       "Paris",
@@ -25,7 +25,7 @@ function initialState(): BucketMap {
     ),
   ];
 
-  flashcards.set(0, new Set(initialCards));
+  flashcards.set(0, new Set<Flashcard>(initialCards));
   return flashcards;
 }
 
