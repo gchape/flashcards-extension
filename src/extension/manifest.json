@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Flashcard Adder",
+  "name": "Flashcards",
   "version": "1.0",
-  "permissions": ["storage", "scripting", "activeTab"],
+  "permissions": [],
   "host_permissions": ["http://localhost:5173/*"],
   "background": {
     "service_worker": "background.js"
