@@ -1,92 +1,74 @@
 import { AnswerDifficulty, BucketMap, Flashcard } from "./flashcards";
 
-export function toBucketsSets(bucketNumbers: BucketMap) {
-  const result: Set<Flashcard>[] = [];
-
-  for (const [bucketNum, cards] of bucketNumbers.entries()) {
-    if (bucketNum < 0) {
-      throw new Error("Bucket index, must be a nonnegative number.");
-    }
-
-    result[bucketNum] = cards;
-  }
-
-  return result;
-}
-
-export function practice(
-  day: number,
-  buckets: Set<Flashcard>[]
-): Set<Flashcard> {
+// Selects flashcards to practice today based on the day.
+// - Always practice Bucket 0 (new/wrong)
+// - Higher buckets shown every 2^bucketNumber days
+export function practice(day: number, bucketMap: BucketMap): Set<Flashcard> {
   if (day < 1) {
-    throw new Error("Day of the learning process, must be >= 1.");
+    throw new Error("Day must be >= 1.");
   }
 
-  const result = new Set<Flashcard>();
+  const cardsToPractice = new Set<Flashcard>();
 
-  if (buckets[0]) {
-    for (const card of buckets[0]) {
-      result.add(card);
-    }
-  }
-
-  for (let bucketNum = 1; bucketNum < buckets.length; bucketNum++) {
-    const interval = Math.pow(2, bucketNum);
-    if (day % interval === 0 && buckets[bucketNum]) {
-      for (const card of buckets[bucketNum]) {
-        result.add(card);
+  for (const [bucketNumber, flashcards] of bucketMap.entries()) {
+    if (bucketNumber === 0) {
+      for (const card of flashcards) {
+        cardsToPractice.add(card);
+      }
+    } else {
+      const interval = Math.pow(2, bucketNumber);
+      if (day % interval === 0) {
+        for (const card of flashcards) {
+          cardsToPractice.add(card);
+        }
       }
     }
   }
 
-  return result;
+  return cardsToPractice;
 }
 
-export function getHint(card: Flashcard): string {
-  if (card.hint) {
-    return card.hint;
-  }
-
-  throw new Error("No hint available for this card.");
-}
-
+// Updates a flashcard's bucket based on answer difficulty.
+// - Wrong ➔ Bucket 0
+// - Hard ➔ Stay in same bucket
+// - Easy ➔ Move to next higher bucket
 export function update(
-  buckets: BucketMap,
+  bucketMap: BucketMap,
   card: Flashcard,
   difficulty: AnswerDifficulty
 ): BucketMap {
   const newBuckets = new Map<number, Set<Flashcard>>();
+  let currentBucketNumber: number | null = null;
 
-  let currentBucket = -1;
-  for (const [bucketNum, cards] of buckets.entries()) {
-    const newSet = new Set<Flashcard>(cards);
-    newBuckets.set(bucketNum, newSet);
+  for (const [bucketNumber, cards] of bucketMap.entries()) {
+    const copiedCards = new Set<Flashcard>(cards);
+    newBuckets.set(bucketNumber, copiedCards);
 
     if (cards.has(card)) {
-      currentBucket = bucketNum;
+      currentBucketNumber = bucketNumber;
     }
   }
 
-  if (currentBucket === -1 && !newBuckets.has(0)) {
-    newBuckets.set(0, new Set<Flashcard>());
-  } else if (currentBucket !== -1) {
-    const currentSet = newBuckets.get(currentBucket)!;
-    currentSet.delete(card);
+  if (currentBucketNumber === null) {
+    throw new Error("Card not found in any bucket.");
   }
 
-  let newBucket: number;
+  newBuckets.get(currentBucketNumber)!.delete(card);
+
+  let targetBucketNumber: number;
   if (difficulty === AnswerDifficulty.Wrong) {
-    newBucket = 0;
+    targetBucketNumber = 0;
   } else if (difficulty === AnswerDifficulty.Hard) {
-    newBucket = currentBucket;
+    targetBucketNumber = currentBucketNumber;
   } else {
-    newBucket = currentBucket + 1;
+    targetBucketNumber = currentBucketNumber + 1;
   }
 
-  if (!newBuckets.has(newBucket)) {
-    newBuckets.set(newBucket, new Set<Flashcard>());
+  if (!newBuckets.has(targetBucketNumber)) {
+    newBuckets.set(targetBucketNumber, new Set<Flashcard>());
   }
-  newBuckets.get(newBucket)!.add(card);
+
+  newBuckets.get(targetBucketNumber)!.add(card);
 
   return newBuckets;
 }
