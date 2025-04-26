@@ -97,3 +97,18 @@ export function addCardToBucket(bucketMap: BucketMap, card: Flashcard): void {
 
   bucketZero.add(card);
 }
+
+// --- Types for working with Flashcards ---
+
+// How we rate an answer after practicing a flashcard
+export enum AnswerDifficulty {
+  Wrong = 0, // totally wrong, needs to go back to Bucket 0
+  Hard = 1,  // got it but struggled a bit
+  Easy = 2,  // solid, move up
+}
+
+// Represents all the spaced repetition buckets
+//
+// - Bucket 0: brand new cards + wrong answers
+// - Higher buckets: cards spaced further apart based on performance
+export type BucketMap = Map<number, Set<Flashcard>>;
