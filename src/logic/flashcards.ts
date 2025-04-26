@@ -18,30 +18,30 @@ export class Flashcard {
   // Checks that front/back exist and tags are valid.
   private _validateFlashcard(): void {
     if (!this.front) {
-      throw new Error("Front side cannot be empty.");
+      throw new Error("front side cannot be empty.");
     }
     if (!this.back) {
-      throw new Error("Back side must have an answer.");
+      throw new Error("back side must have an answer.");
     }
     if (this.hint !== undefined && this.hint.length === 0) {
-      throw new Error("Hint must not be empty.");
+      throw new Error("hint must not be empty.");
     }
     if (!Array.isArray(this.tags)) {
-      throw new Error("Tags must be an array.");
+      throw new Error("tags must be an array.");
     }
     for (let t of this.tags) {
       if (typeof t !== "string" || t.trim() === "") {
-        throw new Error("Tags must be non-empty strings.");
+        throw new Error("tags must be non-empty strings.");
       }
     }
   }
 }
 
 /*
-Abstraction Function (AF):
+AF:
 - Flashcard = front (question), back (answer), optional hint and tags.
 
-Representation Invariant (RI):
+RI:
 - front and back must not be empty.
 - tags must be an array of non-empty strings.
 - id is unique per card.
@@ -66,7 +66,7 @@ export function addCardToBucket(bucketMap: BucketMap, card: Flashcard): void {
   const bucketZero = bucketMap.get(0)!;
 
   if (bucketZero.has(card)) {
-    throw new Error("Card already exists in Bucket 0.");
+    throw new Error("card already exists in Bucket 0.");
   }
 
   bucketZero.add(card);

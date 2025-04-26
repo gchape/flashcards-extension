@@ -5,7 +5,7 @@ import { AnswerDifficulty, BucketMap, Flashcard } from "./flashcards";
 // - Higher buckets shown every 2^bucketNumber days
 export function practice(day: number, bucketMap: BucketMap): Set<Flashcard> {
   if (day < 1) {
-    throw new Error("Day must be >= 1.");
+    throw new Error("day must be >= 1.");
   }
 
   const cardsToPractice = new Set<Flashcard>();
@@ -50,7 +50,7 @@ export function update(
   }
 
   if (currentBucketNumber === null) {
-    throw new Error("Card not found in any bucket.");
+    throw new Error("card not found in any bucket.");
   }
 
   newBuckets.get(currentBucketNumber)!.delete(card);
