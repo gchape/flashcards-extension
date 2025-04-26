@@ -77,3 +77,23 @@ export function createFlashcard(
   return new Flashcard(front, back, hint, tags); // pretty much just passes through for now
 }
 
+
+// Drops a flashcard into Bucket 0 (initial learning bucket).
+// If Bucket 0 isn’t there yet, we make it first.
+//
+// Note: throws if the card’s already in — we’re avoiding dupes here on purpose.
+export function addCardToBucket(bucketMap: BucketMap, card: Flashcard): void {
+  // Init bucket 0 if it hasn’t been created yet
+  if (!bucketMap.has(0)) {
+    bucketMap.set(0, new Set<Flashcard>());
+  }
+
+  const bucketZero = bucketMap.get(0)!;
+
+  // Avoid re-adding the same card (for data consistency)
+  if (bucketZero.has(card)) {
+    throw new Error("Card already exists in Bucket 0."); // could switch to warn later if needed
+  }
+
+  bucketZero.add(card);
+}
