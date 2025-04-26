@@ -1,6 +1,4 @@
-// Flashcard class: It is a simple Q&A card with optional hints and tags.
-// (Might tweak this later if we want categories or difficulty levels...)
-
+// Flashcard class: simple Q&A card with optional hint and tags.
 export class Flashcard {
   readonly id: string;
   readonly front: string;
@@ -8,72 +6,66 @@ export class Flashcard {
   readonly hint?: string;
   readonly tags: ReadonlyArray<string>;
 
-  constructor(frontSide: string, backSide: string, hintText?: string, tagList: ReadonlyArray<string> = []) {
-    // Assign a random ID (hope crypto is supported everywhere...)
+  constructor(front: string, back: string, hint?: string, tags: ReadonlyArray<string> = []) {
     this.id = crypto.randomUUID();
-
-    this.front = frontSide.trim();
-    this.back = backSide.trim();
-    this.hint = hintText?.trim(); // Its fine if no hint is passed
-    this.tags = tagList;
-
-    this._validateFlashcard(); // sanity check - make sure its not totally broken
+    this.front = front.trim();
+    this.back = back.trim();
+    this.hint = hint?.trim();
+    this.tags = tags;
+    this.validate();
   }
 
-  //internal check to make sure the card isn't missing required stuff
-  private _validateFlashcard(): void {
+  // Checks that front/back exist and tags are valid.
+  private validate(): void {
     if (!this.front) {
-      throw new Error("Front side cannot be empty. Otherwise, what's the question?");
+      throw new Error("front side cannot be empty.");
     }
+
     if (!this.back) {
-      throw new Error("Back side must have an answer. (duh)");
+      throw new Error("back side must have an answer.");
     }
+    
     if (this.hint !== undefined && this.hint.length === 0) {
-      throw new Error("If you give hint, it should actually hint something.");
+      throw new Error("hint must not be empty.");
     }
-
+    
     if (!Array.isArray(this.tags)) {
-      throw new Error("Tags should be list.Even if it's empty.");
+      throw new Error("tags must be an array.");
     }
-
-    // little paranoid loop just to make sure tags make sense
+    
     for (let t of this.tags) {
       if (typeof t !== "string" || t.trim() === "") {
-        throw new Error("Every tag need to be non-empty string. No ghost tags.");
+        throw new Error("tags must be non-empty strings.");
       }
     }
   }
 }
 
 /*
-Abstraction Function (AF):
-- Think of a Flashcard like a study helper: front = question, back = answer, plus maybe a hint or some tags to keep organized.
-
-Representation Invariant (RI):
-- front and back must have actual text.
-- hint must be meaningful if it exists.
-- tags must be a proper array of non-empty strings.
-- id is assigned at creation and should stay unique.
+AF:
+- Flashcard = front (question), back (answer), optional hint and tags.
+RI:
+- front and back must not be empty.
+- tags must be an array of non-empty strings.
+- id is unique per card.
 */
 
-// TODO: Maybe later add createdAt timestamp?
-// TODO: Support markdown in front/back? (stretch goal)
-
-
-
-
-// Wrapper to create a Flashcard instance.
-// Keeps things cleaner wherever we’re generating new cards (especially outside the class file).
-// Feeds straight into the Flashcard constructor, which handles trimming + validation.
-
-// Note: throws if front/back are missing or any tag/hint is off,
-// so whoever’s calling this should probably catch errors if needed.
+// Creates a Flashcard instance with basic validation.
 export function createFlashcard(
   front: string,
   back: string,
   hint?: string,
   tags: string[] = []
 ): Flashcard {
-  return new Flashcard(front, back, hint, tags); // pretty much just passes through for now
+  return new Flashcard(front, back, hint, tags);
 }
 
+// User's answer rating after a flashcard.
+export enum AnswerDifficulty {
+  Wrong = 0,
+  Hard = 1,
+  Easy = 2,
+}
+
+// Map of buckets for spaced repetition (0 = new cards).
+export type BucketMap = Map<number, Set<Flashcard>>;
