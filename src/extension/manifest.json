@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "Flashcards",
+  "version": "1.0",
+  "description": "A flashcard app with gesture-based rating",
+  "permissions": ["storage", "activeTab", "scripting"],
+  "action": {
+    "default_popup": "index.html",
+    "default_icon": {
+      "512": "icons/icon512.png"
+    }
+  },
+  "icons": {
+    "512": "icons/icon512.png"
+  }
+}
