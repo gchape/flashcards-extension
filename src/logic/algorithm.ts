@@ -14,6 +14,9 @@ export function toBucketsSets(bucketNumbers: BucketMap) {
   return result;
 }
 
+// Selects flashcards to practice today based on the day.
+// - Always practice Bucket 0 (new/wrong)
+// - Higher buckets shown every 2^bucketNumber days
 export function practice(
   day: number,
   buckets: Set<Flashcard>[]
@@ -50,6 +53,10 @@ export function getHint(card: Flashcard): string {
   throw new Error("No hint available for this card.");
 }
 
+// Updates a flashcard's bucket based on answer difficulty.
+// - Wrong ➔ Bucket 0
+// - Hard ➔ Stay in same bucket
+// - Easy ➔ Move to next higher bucket
 export function update(
   buckets: BucketMap,
   card: Flashcard,
@@ -89,4 +96,61 @@ export function update(
   newBuckets.get(newBucket)!.add(card);
 
   return newBuckets;
+}
+
+// Computes basic progress stats based on buckets and practice history
+export function computeProgress(
+  buckets: BucketMap,
+  history: Array<{
+    card: Flashcard;
+    timestamp: number;
+    difficulty: AnswerDifficulty;
+  }>
+): {
+  totalCards: number;
+  cardsPerBucket: Map<number, number>;
+  averageBucket: number;
+  masteredCards: number;
+  successRate: number;
+} {
+  let totalCards = 0;
+  const cardsPerBucket = new Map<number, number>();
+
+  for (const [bucket, cards] of buckets.entries()) {
+    const count = cards.size;
+    totalCards += count;
+    cardsPerBucket.set(bucket, count);
+  }
+
+  let bucketSum = 0;
+  for (const [bucket, count] of cardsPerBucket.entries()) {
+    bucketSum += bucket * count;
+  }
+
+  const averageBucket = totalCards > 0 ? bucketSum / totalCards : 0;
+
+  let masteredCards = 0;
+  for (const [bucket, count] of cardsPerBucket.entries()) {
+    if (bucket >= 3) {
+      masteredCards += count;
+    }
+  }
+
+  let successCount = 0;
+  for (const entry of history) {
+    if (entry.difficulty !== AnswerDifficulty.Wrong) {
+      successCount++;
+    }
+  }
+
+  const successRate =
+    history.length > 0 ? (successCount / history.length) * 100 : 0;
+
+  return {
+    totalCards,
+    cardsPerBucket,
+    averageBucket,
+    masteredCards,
+    successRate,
+  };
 }
