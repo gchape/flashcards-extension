@@ -33,7 +33,7 @@ export class Flashcard {
       throw new Error("tags must be an array.");
     }
     
-    for (let t of this.tags) {
+    for (const t of this.tags) {
       if (typeof t !== "string" || t.trim() === "") {
         throw new Error("tags must be non-empty strings.");
       }
