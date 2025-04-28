@@ -23,6 +23,8 @@ document.getElementById("add-card-form").addEventListener("submit", (e) => {
 
       if (data.status === "ok") {
         alert("Card saved successfully.");
+
+        document.getElementById("add-card-form").reset();
       } else {
         alert("Error saving card.");
       }
