@@ -5,9 +5,6 @@ import { WebSocketServer } from "ws";
 const app = express();
 const PORT = 4000;
 
-// In-memory array to store cards
-const cards = [];
-
 // Create WebSocket server
 const wss = new WebSocketServer({ noServer: true });
 
@@ -29,13 +26,12 @@ app.post("/add-card", (req, res) => {
       .json({ status: "error", message: "Front and Back are required." });
   }
 
-  const newCard = { front, back, hint, tags };
-  cards.push(newCard);
-
   // Notify all connected WebSocket clients about the new card
   wss.clients.forEach((client) => {
     if (client.readyState === WebSocket.OPEN) {
-      client.send(JSON.stringify({ type: "new-card", card: newCard }));
+      client.send(
+        JSON.stringify({ type: "new-card", card: { front, back, hint, tags } })
+      );
     }
   });
 
