@@ -4,25 +4,30 @@ document.getElementById("add-card-form").addEventListener("submit", (e) => {
   const cardData = {
     front: document.getElementById("front").value,
     back: document.getElementById("back").value,
-    hint: document.getElementById("hint").value,
+    hint: document.getElementById("hint")?.value,
     tags: document
       .getElementById("tags")
-      .value.split(",")
+      ?.value.split(",")
       .map((tag) => tag.trim()),
   };
 
-  chrome.runtime.sendMessage(
-    {
-      action: "sendCardData",
-      data: cardData,
-    },
-    (response) => {
-      if (response.status === "success") {
-        alert("Card added!");
-        document.getElementById("add-card-form").reset();
+  (async () => {
+    try {
+      const response = await fetch("http://localhost:4000/add-card", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(cardData),
+      });
+
+      const data = await response.json();
+
+      if (data.status === "ok") {
+        alert("Card saved successfully.");
       } else {
-        alert("Failed to add card!");
+        alert("Error saving card.");
       }
+    } catch (err) {
+      alert("Network or server error.", err);
     }
-  );
+  })();
 });
