@@ -5,20 +5,31 @@ import Header from "./components/Header";
 import Card from "./components/Card";
 import { ActionBar } from "./components/ActionBar";
 import { Flashcard } from "../logic/flashcards";
-import { startDetection } from "../detect/detection";
+import { startDetection, stopDetection, cleanupDetection } from "../detect/detection";
 
 export default function App() {
   const [day, setDay] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
   const [currentCardsCount, setCurrentCardsCount] = useState(0);
+  const [isDetectionActive, setIsDetectionActive] = useState(false);
 
   const currentCard = useRef<Record<number, Flashcard>>([]);
 
   useEffect(() => {
-    if (showAnswer) {
-      startDetection();
+    return () => {
+      // Cleanup when component unmounts
+      cleanupDetection();
+    };
+  }, []);
+
+  const handleDetectionToggle = async () => {
+    if (!isDetectionActive) {
+      await startDetection();
+    } else {
+      stopDetection();
     }
-  }, [showAnswer]);
+    setIsDetectionActive(!isDetectionActive);
+  };
 
   return (
     <FlashcardsContextProvider>
@@ -37,6 +48,36 @@ export default function App() {
           setShowAnswer={setShowAnswer}
           currentCardsCount={currentCardsCount}
         />
+        
+        {/* Camera Control Button */}
+        <button
+          onClick={handleDetectionToggle}
+          // In the button style
+style={{
+  position: 'fixed',
+  bottom: '20px',
+  left: '20px',
+  zIndex: 10001,
+  padding: '12px 24px',
+  borderRadius: '30px',
+  backgroundColor: isDetectionActive ? '#ff4444' : '#4CAF50',
+  color: 'white',
+  border: 'none',
+  cursor: 'pointer',
+  fontSize: '16px',
+  fontWeight: 'bold',
+  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+  transition: 'all 0.3s ease',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px'
+}}
+        >
+          <span style={{ fontSize: '24px' }}>
+            {isDetectionActive ? '⏸️' : '🎥'}
+          </span>
+          {isDetectionActive ? 'Stop Gesture Control' : 'Start Gesture Control'}
+        </button>
       </Main>
     </FlashcardsContextProvider>
   );
