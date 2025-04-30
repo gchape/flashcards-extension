@@ -2,7 +2,8 @@ import * as tf from '@tensorflow/tfjs';
 import { Hands, HAND_CONNECTIONS } from '@mediapipe/hands';
 import { Pose } from '@mediapipe/pose';
 import { Camera } from '@mediapipe/camera_utils';
-import { drawConnectors } from '@mediapipe/drawing_utils';
+import { drawConnectors , drawLandmarks } from '@mediapipe/drawing_utils';
+//import { drawLandmarks } from '@mediapipe/drawing_utils';
 
 let handModel: Hands | null = null;
 let poseModel: Pose | null = null;
@@ -24,11 +25,51 @@ const POSE_CONNECTIONS: [number, number][] = [
     [29, 31], [30, 32], [27, 31], [28, 32]
 ];
 
+function detectGesture(landmarks: any): string | null {
+    const [thumbTip, thumbBase] = [landmarks[4], landmarks[1]];
+    const [indexTip, middleTip, ringTip, pinkyTip] = [landmarks[8], landmarks[12], landmarks[16], landmarks[20]];
+    const [indexBase, middleBase, ringBase, pinkyBase] = [landmarks[5], landmarks[9], landmarks[13], landmarks[17]];
+
+    const isThumbsUp = thumbTip.y < thumbBase.y &&
+        indexTip.y > indexBase.y &&
+        middleTip.y > middleBase.y &&
+        ringTip.y > ringBase.y &&
+        pinkyTip.y > pinkyBase.y;
+
+    const isThumbsDown = thumbTip.y > thumbBase.y &&
+        indexTip.y > indexBase.y &&
+        middleTip.y > middleBase.y &&
+        ringTip.y > ringBase.y &&
+        pinkyTip.y > pinkyBase.y;
+
+    const isRaisedHand = 
+        thumbTip.y < thumbBase.y &&
+        indexTip.y < indexBase.y &&
+        middleTip.y < middleBase.y &&
+        ringTip.y < ringBase.y &&
+        pinkyTip.y < pinkyBase.y;
+
+    if (isThumbsUp) return "Thumbs Up";
+    if (isThumbsDown) return "Thumbs Down";
+    if (isRaisedHand) return "Raised Hand";
+
+    return null;
+}
+function stopDetection() {
+    if (camera) {
+        camera.stop();
+        console.log("Camera stopped after detecting gesture.");
+    }
+    if (videoElement) videoElement.remove();
+    if (canvasElement) canvasElement.remove();
+}
+
+
 async function loadHandModel() {
     await tf.ready();
     handModel = new Hands({
         locateFile: (file) => {
-            return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/dist/${file};`
+            return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/dist/${file}`;
         }
     });
     
@@ -50,7 +91,7 @@ async function loadPoseModel() {
     await tf.ready();
     poseModel = new Pose({
         locateFile: (file) => {
-            return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/dist/${file};`
+            return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/dist/${file}`;
         }
     });
     
@@ -71,21 +112,25 @@ async function loadPoseModel() {
 }
 
 function processHandResults(results: any) {
-    if (!canvasCtx || !canvasElement) return;
-    
+    if (!canvasCtx || !canvasElement || !results.multiHandLandmarks) return;
+
     canvasCtx.save();
     canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-    
-    // Draw hands if detected
-    if (results.multiHandLandmarks) {
-        results.multiHandLandmarks.forEach((handLandmarks: any) => {
-            drawConnectors(canvasCtx!, handLandmarks, HAND_CONNECTIONS, 
-                { color: '#00FF00', lineWidth: 5 });
-        });
+
+    for (const landmarks of results.multiHandLandmarks) {
+        drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS, { color: '#00FF00', lineWidth: 4 });
+
+        const gesture = detectGesture(landmarks);
+        if (gesture) {
+            console.log("Detected gesture:", gesture);
+            stopDetection();
+            break;
+        }
     }
-    
+
     canvasCtx.restore();
 }
+
 
 function processPoseResults(results: any) {
     if (!canvasCtx || !canvasElement) return;
@@ -177,9 +222,10 @@ async function init() {
 }
 
 // Add an event listener to start initialization when the page is loaded
-window.addEventListener('DOMContentLoaded', init); //, which is located in src/detection/det.ts
+//window.addEventListener('DOMContentLoaded', init); //, which is located in src/detection/det.ts
 
 export async function startDetection() {
+    await new Promise((resolve) => setTimeout(resolve, 5000));
     await init();
   }
   
