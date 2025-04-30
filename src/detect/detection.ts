@@ -1,9 +1,10 @@
+
 import * as tf from '@tensorflow/tfjs';
 import { Hands, HAND_CONNECTIONS } from '@mediapipe/hands';
 import { Pose } from '@mediapipe/pose';
 import { Camera } from '@mediapipe/camera_utils';
 import { drawConnectors , drawLandmarks } from '@mediapipe/drawing_utils';
-//import { drawLandmarks } from '@mediapipe/drawing_utils';
+
 
 let handModel: Hands | null = null;
 let poseModel: Pose | null = null;
