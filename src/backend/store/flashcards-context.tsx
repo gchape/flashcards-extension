@@ -1,13 +1,12 @@
-import { createContext, ReactNode, useContext } from "react";
+import { createContext, ReactNode, useContext, useReducer } from "react";
 import { practice, update } from "../../logic/algorithm";
-import { FlashcardsContext } from "./types";
+import { FlashcardsAction, FlashcardsState } from "./types";
 import { BucketMap, Flashcard } from "../../logic/flashcards";
 
 // Create initial state with some sample flashcards in bucket 0
 function initialState(): BucketMap {
   const flashcards = new Map<number, Set<Flashcard>>();
-
-  const initialCards: Array<Flashcard> = [
+  const initialCards = [
     new Flashcard(
       "What is the capital of France?",
       "Paris",
@@ -18,30 +17,43 @@ function initialState(): BucketMap {
       "George Orwell",
       "A famous dystopian novel"
     ),
-    new Flashcard(
-      "What is the boiling point of water (in Celsius)?",
-      "100",
-      "Standard pressure"
-    ),
   ];
-
-  flashcards.set(0, new Set<Flashcard>(initialCards));
+  flashcards.set(0, new Set(initialCards));
   return flashcards;
 }
 
-// Create context object
-const Context = createContext<FlashcardsContext | null>(null);
+// Reducer
+function flashcardsReducer(
+  state: BucketMap,
+  action: FlashcardsAction
+): BucketMap {
+  switch (action.type) {
+    case "SET_STATE":
+      return action.newState;
+    default:
+      return state;
+  }
+}
 
-// Provider component for wrapping app
+// Context
+const Context = createContext<FlashcardsState | null>(null);
+
+// Provider
 export default function FlashcardsContextProvider({
   children,
 }: {
   children: ReactNode;
 }) {
-  const flashcardsContext: FlashcardsContext = {
-    flashcards: initialState(),
-    update: update,
-    practice: practice,
+  const [flashcards, dispatch] = useReducer(flashcardsReducer, initialState());
+
+  const flashcardsContext: FlashcardsState = {
+    flashcards,
+    update: (buckets, card, difficulty) => {
+      const newState = update(buckets, card, difficulty);
+      dispatch({ type: "SET_STATE", newState });
+      return newState;
+    },
+    practice: (day, buckets) => practice(day, buckets),
   };
 
   return (
@@ -49,13 +61,11 @@ export default function FlashcardsContextProvider({
   );
 }
 
-// Custom hook to access flashcard context
+// Hook to access context
 export function useFlashcardsContext() {
   const flashcardsContext = useContext(Context);
-
-  if (flashcardsContext === null) {
-    throw new Error("Context must be used within a FlashcardsContextProvider");
+  if (!flashcardsContext) {
+    throw new Error("Context must be used within a FlashcardsContextProvider!");
   }
-
   return flashcardsContext;
 }
