@@ -2,7 +2,7 @@ import { ComponentPropsWithoutRef } from "react";
 import styles from "./css/Footer.module.css";
 
 interface FooterProps extends ComponentPropsWithoutRef<"footer"> {}
-
+// The footer component is used to display the voting options for the flashcards
 export default function Footer({ children }: FooterProps) {
   return (
     <footer className={styles.footer}>
