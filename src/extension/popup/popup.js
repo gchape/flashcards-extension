@@ -34,3 +34,10 @@ document.getElementById("add-card-form").addEventListener("submit", (e) => {
     }
   })();
 });
+
+document
+  .getElementById("start-flashcards-btn")
+  .addEventListener("click", () => {
+    const url = chrome.runtime.getURL("flashcards.html");
+    chrome.tabs.create({ url });
+  });
