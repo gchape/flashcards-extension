@@ -26,25 +26,26 @@ const POSE_CONNECTIONS: [number, number][] = [
     [29, 31], [30, 32], [27, 31], [28, 32]
 ];
 
+// Detects gestures based on hand landmarks and returns the gesture name
 function detectGesture(landmarks: any): string | null {
     const [thumbTip, thumbBase] = [landmarks[4], landmarks[1]];
     const [indexTip, middleTip, ringTip, pinkyTip] = [landmarks[8], landmarks[12], landmarks[16], landmarks[20]];
     const [indexBase, middleBase, ringBase, pinkyBase] = [landmarks[5], landmarks[9], landmarks[13], landmarks[17]];
 
-    const isThumbsUp = thumbTip.y < thumbBase.y &&
+    const isThumbsUp = thumbTip.y > thumbBase.y && //  thumb is up and other fingers are down
         indexTip.y > indexBase.y &&
         middleTip.y > middleBase.y &&
         ringTip.y > ringBase.y &&
         pinkyTip.y > pinkyBase.y;
 
-    const isThumbsDown = thumbTip.y > thumbBase.y &&
+    const isThumbsDown = thumbTip.y < thumbBase.y && // thumb is down and other fingers are up
         indexTip.y > indexBase.y &&
         middleTip.y > middleBase.y &&
         ringTip.y > ringBase.y &&
         pinkyTip.y > pinkyBase.y;
 
     const isRaisedHand = 
-        thumbTip.y < thumbBase.y &&
+        thumbTip.y < thumbBase.y && // fingers are in the vertical position
         indexTip.y < indexBase.y &&
         middleTip.y < middleBase.y &&
         ringTip.y < ringBase.y &&
@@ -52,10 +53,12 @@ function detectGesture(landmarks: any): string | null {
 
     if (isThumbsUp) return "Thumbs Up";
     if (isThumbsDown) return "Thumbs Down";
-    if (isRaisedHand) return "Raised Hand";
+    if (isRaisedHand) return "Raised Hand"; //returns the condition name
 
-    return null;
+    return "Not detected";
 }
+
+// Stops the camera and removes video and canvas elements from the DOM
 function stopDetection() {
     if (camera) {
         camera.stop();
@@ -65,7 +68,7 @@ function stopDetection() {
     if (canvasElement) canvasElement.remove();
 }
 
-
+// Loads and configures the MediaPipe Hands model for hand detection
 async function loadHandModel() {
     await tf.ready();
     handModel = new Hands({
@@ -88,6 +91,7 @@ async function loadHandModel() {
     console.log('Hand detection model loaded');
 }
 
+// Loads and configures the MediaPipe Pose model for pose detection
 async function loadPoseModel() {
     await tf.ready();
     poseModel = new Pose({
@@ -112,6 +116,7 @@ async function loadPoseModel() {
     console.log('Pose detection model loaded');
 }
 
+// Processes the results from the hand detection model and detects gestures
 function processHandResults(results: any) {
     if (!canvasCtx || !canvasElement || !results.multiHandLandmarks) return;
 
@@ -134,7 +139,7 @@ function processHandResults(results: any) {
     canvasCtx.restore();
 }
 
-
+// Processes the results from the pose detection model and draws pose landmarks
 function processPoseResults(results: any) {
     if (!canvasCtx || !canvasElement) return;
     
@@ -150,6 +155,7 @@ function processPoseResults(results: any) {
     canvasCtx.restore();
 }
 
+// Sets up the camera, video, and canvas elements for real-time detection
 async function setupCamera() {
     try {
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -183,10 +189,10 @@ async function setupCamera() {
         document.body.appendChild(videoElement);
         document.body.appendChild(canvasElement);
         
-        // Style elements
+        // Style elements, I made it it more left
         videoElement.style.position = 'absolute';
-        videoElement.style.left = '20px'; // move video 20px from the left
-        videoElement.style.top = '100px'; // optional: move down to not cover header
+        videoElement.style.left = '20px';
+        videoElement.style.top = '100px';
         videoElement.style.transform = 'scaleX(-1)';
         videoElement.style.zIndex = '10';
         
@@ -196,12 +202,10 @@ async function setupCamera() {
         canvasElement.style.transform = 'scaleX(-1)';
         canvasElement.style.zIndex = '11';
         
- // Mirror canvas too
-        
         if (!canvasCtx) {
             throw new Error('Could not get 2D rendering context for canvas');
         }
-
+            // here our camera should try to detect gestures and poses
         camera = new Camera(videoElement, {
             onFrame: async () => {
               console.log("Processing frame...");
@@ -213,10 +217,9 @@ async function setupCamera() {
               }
             },
             width: 300,
-            height: 300,
+            height: 300, // same size as video
           });
           
-        
         camera.start();
         console.log("Camera setup complete");
     } catch (error) {
@@ -224,6 +227,7 @@ async function setupCamera() {
     }
 }
 
+// Initializes the hand and pose models and sets up the camera
 async function init() {
     try {
         await loadHandModel();
@@ -235,11 +239,8 @@ async function init() {
     }
 }
 
-// Add an event listener to start initialization when the page is loaded
-//window.addEventListener('DOMContentLoaded', init); //, which is located in src/detection/det.ts
-
+// Starts the detection process after a delay and then exports the function
 export async function startDetection() {
     await new Promise((resolve) => setTimeout(resolve, 5000));
     await init();
-  }
-  
+}
