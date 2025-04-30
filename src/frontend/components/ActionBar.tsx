@@ -1,7 +1,8 @@
 import { useEffect } from "react";
-import { Flashcard } from "../../logic/flashcards";
+import { AnswerDifficulty, Flashcard } from "../../logic/flashcards";
 import Button from "./Button";
 import Footer from "./Footer";
+import { useFlashcardsContext } from "../../backend/store/flashcards-context";
 
 type ActionBarProps = {
   showAnswer: boolean;
@@ -18,20 +19,23 @@ export function ActionBar({
   setShowAnswer,
   currentCardsCount,
 }: ActionBarProps) {
+  const ctx = useFlashcardsContext();
+
   useEffect(() => {
     const ws = new WebSocket("ws://localhost:4000");
 
     ws.onopen = () => console.log("WebSocket connection established");
 
-    ws.onmessage = (event) => {
+    ws.onmessage = (event: MessageEvent<any>) => {
       const message = JSON.parse(event.data);
       if (message.type === "new-card") {
-        const newCard: Flashcard = message.card;
-        
-        console.log("New Card received", newCard);
+        const flashcard: Flashcard = message.card;
+        ctx.update(ctx.flashcards, flashcard, AnswerDifficulty.Easy);
+
+        console.log("New Card received", flashcard);
       }
     };
-
+    
     ws.onerror = (error) => console.error("WebSocket error:", error);
 
     return () => ws.close();
