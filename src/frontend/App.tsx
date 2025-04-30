@@ -5,7 +5,7 @@ import Header from "./components/Header";
 import Card from "./components/Card";
 import { ActionBar } from "./components/ActionBar";
 import { Flashcard } from "../logic/flashcards";
-import { startDetection } from "../detection/gestureDetection";
+import { startDetection } from "../detect/detection";
 
 export default function App() {
   const [day, setDay] = useState(0);

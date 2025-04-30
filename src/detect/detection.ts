@@ -1,9 +1,10 @@
+
 import * as tf from '@tensorflow/tfjs';
 import { Hands, HAND_CONNECTIONS } from '@mediapipe/hands';
 import { Pose } from '@mediapipe/pose';
 import { Camera } from '@mediapipe/camera_utils';
 import { drawConnectors , drawLandmarks } from '@mediapipe/drawing_utils';
-//import { drawLandmarks } from '@mediapipe/drawing_utils';
+
 
 let handModel: Hands | null = null;
 let poseModel: Pose | null = null;
@@ -116,6 +117,8 @@ function processHandResults(results: any) {
 
     canvasCtx.save();
     canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+    canvasCtx.fillStyle = 'red';
+    canvasCtx.fillRect(10, 10, 50, 50);
 
     for (const landmarks of results.multiHandLandmarks) {
         drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS, { color: '#00FF00', lineWidth: 4 });
@@ -154,7 +157,7 @@ async function setupCamera() {
         }
 
         const stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: 'user', width: 640, height: 480 },
+            video: { facingMode: 'user', width: 300, height: 300 },
             audio: false
         });
 
@@ -172,8 +175,8 @@ async function setupCamera() {
 
         // Setup canvas
         canvasElement = document.createElement('canvas');
-        canvasElement.width = 640;
-        canvasElement.height = 480;
+        canvasElement.width = 300;
+        canvasElement.height = 300;
         canvasCtx = canvasElement.getContext('2d');
         
         // Add elements to the DOM
@@ -182,9 +185,18 @@ async function setupCamera() {
         
         // Style elements
         videoElement.style.position = 'absolute';
-        videoElement.style.transform = 'scaleX(-1)'; // Mirror video
+        videoElement.style.left = '20px'; // move video 20px from the left
+        videoElement.style.top = '100px'; // optional: move down to not cover header
+        videoElement.style.transform = 'scaleX(-1)';
+        videoElement.style.zIndex = '10';
+        
         canvasElement.style.position = 'absolute';
-        canvasElement.style.transform = 'scaleX(-1)'; // Mirror canvas too
+        canvasElement.style.left = '20px'; // same left offset
+        canvasElement.style.top = '100px';
+        canvasElement.style.transform = 'scaleX(-1)';
+        canvasElement.style.zIndex = '11';
+        
+ // Mirror canvas too
         
         if (!canvasCtx) {
             throw new Error('Could not get 2D rendering context for canvas');
@@ -192,16 +204,18 @@ async function setupCamera() {
 
         camera = new Camera(videoElement, {
             onFrame: async () => {
-                if (videoElement && handModel) {
-                    await handModel.send({ image: videoElement });
-                }
-                if (videoElement && poseModel) {
-                    await poseModel.send({ image: videoElement });
-                }
+              console.log("Processing frame...");
+              if (videoElement && handModel) {
+                await handModel.send({ image: videoElement });
+              }
+              if (videoElement && poseModel) {
+                await poseModel.send({ image: videoElement });
+              }
             },
-            width: 640,
-            height: 480,
-        });
+            width: 300,
+            height: 300,
+          });
+          
         
         camera.start();
         console.log("Camera setup complete");
