@@ -1,4 +1,4 @@
-### PHASE 0: Project Setup
+### PHASE 0: Project Setup ✅
 
 - [ ] Create project folder: `flashcard-extension`
 - [ ] Set up React app inside `extension/` (Vite or CRA)
@@ -8,76 +8,93 @@
 
 ---
 
-### PHASE 1: Chrome Extension Foundation
+### PHASE 1: Backend Server ✅
+
+- [ ] Create Express server in `src/backend/server/server.js`
+- [ ] Set up WebSocket server for real-time communication
+- [ ] Implement endpoint for adding new flashcards (`/add-card`)
+- [ ] Configure CORS for cross-origin requests
+- [ ] Establish WebSocket connection for real-time updates
+
+---
+
+### PHASE 2: Frontend UI Components ✅
+
+- [ ] Create main app structure (`App.tsx`)
+- [ ] Implement header component
+- [ ] Create flashcard display component
+- [ ] Build action bar with buttons
+- [ ] Style components with CSS modules
+- [ ] Implement basic flashcard navigation
+
+---
+
+### PHASE 3: Chrome Extension 
 
 - [ ] Create `manifest.json` (v3)
-  - Permissions: `activeTab`, `scripting`, `storage`
-  - Declare popup and content script
-- [ ] Create React popup UI (`Popup.jsx`)
-- [ ] Create content script to capture highlighted text
-- [ ] Use `chrome.runtime.sendMessage` to send selection to popup
-- [ ] Add "Create Flashcard" button in popup
-- [ ] Add selected text to Context state as a new `Flashcard` (starts in bucket 0)
+- [ ] Build popup UI (HTML/CSS)
+- [ ] Implement JavaScript for the popup
+- [ ] Connect popup to backend server
+- [ ] Style extension UI
 
 ---
 
-### PHASE 2: Gesture Detection (TensorFlow.js)
+### PHASE 4: Gesture Detection Implementation 
 
-- [ ] Add webcam feed component (`GestureDetector.jsx`)
-- [ ] Load `@tensorflow-models/handpose`
-- [ ] Detect:
+- [ ] Set up TensorFlow.js and MediaPipe
+- [ ] Implement webcam feed setup
+- [ ] Create gesture detection functions
+- [ ] Implement gesture recognition logic:
   - Thumbs up → Easy
-  - Flat hand → Hard
   - Thumbs down → Wrong
-- [ ] Map gestures to `AnswerDifficulty`
-- [ ] On detection, update flashcard rating and reassign to appropriate bucket
+  - Raised hand → Hard
+- [ ] Connect detection with flashcard rating
 
 ---
 
-### PHASE 3: Flashcard Logic (Context API with BucketMap)
+### PHASE 5: Flashcard Algorithm 
 
-- [ ] Store flashcards using `BucketMap`:
-  ```ts
-  type BucketMap = Map<number, Set<Flashcard>>;
-  ```
-- [ ] On addCard:
-  - Add new `Flashcard` to `bucket 0`
-- [ ] On rateCard:
-  - If `Wrong`: move to `bucket 0`
-  - If `Hard`: optionally move down or stay
-  - If `Easy`: move to next higher bucket
-- [ ] Prioritize cards from lower-numbered buckets during review
-- [ ] Create helper to get next flashcard for review based on bucket priority
-- [ ] (Optional) Persist `BucketMap` in `localStorage`
+- [ ] Implement spaced repetition algorithm
+- [ ] Create bucket system for organizing cards
+- [ ] Build practice mode functionality
+- [ ] Implement difficulty-based card movement between buckets
 
 ---
 
-### PHASE 4: Review UI
+### PHASE 6: Integration and Real-time Updates 
 
-- [ ] Build review mode component
-- [ ] Flip between front and back of flashcard
-- [ ] Show current card from prioritized bucket
-- [ ] Display gesture feedback in UI
-- [ ] Show review progress (cards completed / total)
-
----
-
-### PHASE 5: Polish and Package
-
-- [ ] Test highlight to card creation flow
-- [ ] Test gesture to rating logic
-- [ ] Style UI (optional: Tailwind or custom CSS)
-- [ ] Load unpacked extension in Chrome
-- [ ] Package extension as ZIP for Chrome Web Store
+- [ ] Connect gesture detection results to difficulty ratings
+- [ ] Update `ActionBar.tsx` to handle gesture recognition results
+- [ ] Wire up button clicks to update card difficulty
+- [ ] Process WebSocket messages for real-time flashcard updates
+- [ ] Make sure new cards from extension appear immediately
 
 ---
 
-### Bonus (Optional)
+### PHASE 7: Testing and Debugging 
 
-- [ ] Add edit/delete flashcard options
-- [ ] Add manual back/answer or hint field in UI
-- [ ] Add tag filtering by `Flashcard.tags`
-- [ ] Add in-page overlay for flashcard creation
-- [ ] Add dark mode or animation themes
+- [ ] Test WebSocket communication
+- [ ] Debug gesture recognition accuracy
+- [ ] Test browser extension functionality
+- [ ] Ensure card progression works correctly
+- [ ] Verify spaced repetition algorithm implementation
 
 ---
+
+### PHASE 8: User Experience Improvements 
+
+- [ ] Add loading states
+- [ ] Implement error handling for server connection issues
+- [ ] Add visual feedback for gesture recognition
+- [ ] Improve webcam feed placement and styling
+- [ ] Add instructions for first-time users
+
+---
+
+### PHASE 9: Final Polishing 
+
+- [ ] Refactor code for better organization
+- [ ] Optimize performance
+- [ ] Add more helpful hints and messages
+- [ ] Fix any UI/UX issues
+- [ ] Add analytics for tracking user progress (optional)
