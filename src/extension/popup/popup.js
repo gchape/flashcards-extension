@@ -1,3 +1,4 @@
+// Set up the extension's popup page
 document.getElementById("add-card-form").addEventListener("submit", (e) => {
   e.preventDefault();
 
