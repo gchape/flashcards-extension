@@ -56,14 +56,8 @@ export function ActionBar({
       text="Go to Next Day"
       onClick={() => setDay((prev) => prev + 1)}
     />
-  ) : showAnswer ? (
-    // If the answer is being shown, display buttons for rating the flashcard
-    <Footer>
-      <Button className="wrong" text="Wrong" />
-      <Button className="hard" text="Hard" />
-      <Button className="easy" text="Easy" />
-    </Footer>
-  ) : (
+  ) 
+   : (
     // If the answer is not being shown, display buttons for getting a hint or showing the answer
     <div style={{ display: "flex", gap: "20px" }}>
       <Button
