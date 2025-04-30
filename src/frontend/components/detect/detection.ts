@@ -83,7 +83,8 @@ function displayGesture(gesture: string | null) {
         gestureDisplayElement.style.boxShadow = '0 0 30px rgba(255,255,255,0.2)';
         gestureDisplayElement.style.display = 'none';
         document.body.appendChild(gestureDisplayElement);
-
+        const event = new CustomEvent('gestureDetected', { detail: gesture });
+        window.dispatchEvent(event);
     }
 
     const emoji = GESTURE_EMOJI_MAP[gesture] || '';
@@ -256,4 +257,5 @@ export function cleanupDetection() {
     }
 
     handModel = null;
+    
 }

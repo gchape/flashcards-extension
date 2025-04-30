@@ -5,7 +5,7 @@ import Header from "./components/Header";
 import Card from "./components/Card";
 import { ActionBar } from "./components/ActionBar";
 import { Flashcard } from "../logic/flashcards";
-import { startDetection, stopDetection, cleanupDetection } from "../detect/detection";
+import { startDetection, stopDetection, cleanupDetection } from "./components/detect/detection";
 
 export default function App() {
   const [day, setDay] = useState(0);
@@ -52,26 +52,25 @@ export default function App() {
         {/* Camera Control Button */}
         <button
           onClick={handleDetectionToggle}
-          // In the button style
-style={{
-  position: 'fixed',
-  bottom: '20px',
-  left: '20px',
-  zIndex: 10001,
-  padding: '12px 24px',
-  borderRadius: '30px',
-  backgroundColor: isDetectionActive ? '#ff4444' : '#4CAF50',
-  color: 'white',
-  border: 'none',
-  cursor: 'pointer',
-  fontSize: '16px',
-  fontWeight: 'bold',
-  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-  transition: 'all 0.3s ease',
-  display: 'flex',
-  alignItems: 'center',
-  gap: '8px'
-}}
+          style={{
+            position: 'fixed',
+            bottom: '20px',
+            left: '20px',
+            zIndex: 10001,
+            padding: '12px 24px',
+            borderRadius: '30px',
+            backgroundColor: isDetectionActive ? '#ff4444' : '#4CAF50',
+            color: 'white',
+            border: 'none',
+            cursor: 'pointer',
+            fontSize: '16px',
+            fontWeight: 'bold',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            transition: 'all 0.3s ease',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}
         >
           <span style={{ fontSize: '24px' }}>
             {isDetectionActive ? '⏸️' : '🎥'}
