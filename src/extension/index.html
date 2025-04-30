@@ -20,9 +20,13 @@
 
         <label for="tags">Tags (comma-separated)</label>
         <input type="text" id="tags" name="tags" />
-
-        <button type="submit" class="button button--save">Add Card</button>
+        
       </form>
+
+      <div class="button-group">
+        <button type="submit" form="add-card-form" class="button button--save">Add Card</button>
+        <button type="button" id="start-flashcards-btn" class="button button--launch">Start Flashcards</button>
+      </div>
     </div>
 
     <script src="popup/popup.js"></script>
