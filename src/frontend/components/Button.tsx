@@ -1,6 +1,6 @@
 import { ComponentPropsWithoutRef } from "react";
 import styles from "./css/Button.module.css";
-
+// Here the different buttons are created with different classes
 interface ButtonProps extends ComponentPropsWithoutRef<"button"> {
   text: string;
   className:
