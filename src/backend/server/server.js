@@ -26,6 +26,8 @@ app.post("/add-card", (req, res) => {
       .json({ status: "error", message: "Front and Back are required." });
   }
 
+  console.log("New card added:", { front, back, hint, tags });
+
   // Notify all connected WebSocket clients about the new card
   wss.clients.forEach((client) => {
     if (client.readyState === WebSocket.OPEN) {
