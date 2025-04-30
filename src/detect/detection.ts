@@ -18,7 +18,9 @@ const GESTURE_EMOJI_MAP: Record<string, string> = {
     "Raised Hand": "✋"
 };
 
+// Detects gestures based on hand landmarks and returns the gesture name
 function detectGesture(landmarks: any): string | null {
+
     const WRIST = landmarks[0];
     const THUMB_TIP = landmarks[4];
     const THUMB_IP = landmarks[3]; // Thumb interphalangeal joint
@@ -58,7 +60,7 @@ function detectGesture(landmarks: any): string | null {
     if (isThumbDown) return "Thumbs Down";
     if (isRaisedHand) return "Raised Hand";
 
-    return null;
+    return "Not detected";
 }
 
 function displayGesture(gesture: string | null) {
@@ -81,6 +83,7 @@ function displayGesture(gesture: string | null) {
         gestureDisplayElement.style.boxShadow = '0 0 30px rgba(255,255,255,0.2)';
         gestureDisplayElement.style.display = 'none';
         document.body.appendChild(gestureDisplayElement);
+
     }
 
     const emoji = GESTURE_EMOJI_MAP[gesture] || '';
@@ -130,12 +133,15 @@ async function loadHandModel() {
                     displayGesture(gesture);
                 }
             }
+
         }
         canvasCtx.restore();
     });
+
 }
 
 // In setupCamera function
+
 async function setupCamera() {
     try {
         const stream = await navigator.mediaDevices.getUserMedia({
@@ -166,6 +172,7 @@ async function setupCamera() {
         videoElement.playsInline = true;
 
         canvasElement = document.createElement('canvas');
+
         canvasElement.style.width = '100%';
         canvasElement.style.height = '100%';
         canvasElement.style.position = 'absolute';
@@ -184,12 +191,14 @@ async function setupCamera() {
         canvasElement.height = videoElement.videoHeight;
         canvasCtx = canvasElement.getContext('2d');
 
+
         camera = new Camera(videoElement, {
             onFrame: async () => {
                 if (handModel && isDetectionActive) {
                     await handModel.send({ image: videoElement });
                 }
             },
+
             width: videoElement.videoWidth,
             height: videoElement.videoHeight
         });
@@ -203,6 +212,7 @@ async function setupCamera() {
 export async function startDetection() {
     if (!isDetectionActive) {
         isDetectionActive = true;
+
         await loadHandModel();
         await setupCamera();
     }
