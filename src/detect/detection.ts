@@ -1,245 +1,249 @@
-
 import * as tf from '@tensorflow/tfjs';
 import { Hands, HAND_CONNECTIONS } from '@mediapipe/hands';
-import { Pose } from '@mediapipe/pose';
 import { Camera } from '@mediapipe/camera_utils';
-import { drawConnectors , drawLandmarks } from '@mediapipe/drawing_utils';
-
+import { drawConnectors, drawLandmarks } from '@mediapipe/drawing_utils';
 
 let handModel: Hands | null = null;
-let poseModel: Pose | null = null;
 let camera: Camera | null = null;
 let videoElement: HTMLVideoElement | null = null;
 let canvasElement: HTMLCanvasElement | null = null;
 let canvasCtx: CanvasRenderingContext2D | null = null;
+let gestureDisplayElement: HTMLDivElement | null = null;
+let gestureDetectionTimeout: number | null = null;
+let isDetectionActive = false;
 
-// The MediaPipe Hands package already defines HAND_CONNECTIONS
-// Define POSE_CONNECTIONS manually as it's not directly exported
-
-const POSE_CONNECTIONS: [number, number][] = [
-    [0, 1], [1, 2], [2, 3], [3, 4],
-    [0, 5], [5, 6], [6, 7], [7, 8],
-    [5, 9], [9, 10], [10, 11], [11, 12],
-    [0, 13], [13, 14], [14, 15], [15, 16],
-    [0, 17], [17, 18], [18, 19], [19, 20],
-    [11, 23], [12, 24], [23, 24], [23, 25], [24, 26], [25, 27], [26, 28], [27, 29], [28, 30],
-    [29, 31], [30, 32], [27, 31], [28, 32]
-];
+const GESTURE_EMOJI_MAP: Record<string, string> = {
+    "Thumbs Up": "👍",
+    "Thumbs Down": "👎",
+    "Raised Hand": "✋"
+};
 
 function detectGesture(landmarks: any): string | null {
-    const [thumbTip, thumbBase] = [landmarks[4], landmarks[1]];
-    const [indexTip, middleTip, ringTip, pinkyTip] = [landmarks[8], landmarks[12], landmarks[16], landmarks[20]];
-    const [indexBase, middleBase, ringBase, pinkyBase] = [landmarks[5], landmarks[9], landmarks[13], landmarks[17]];
+    const WRIST = landmarks[0];
+    const THUMB_TIP = landmarks[4];
+    const THUMB_IP = landmarks[3]; // Thumb interphalangeal joint
+    const INDEX_TIP = landmarks[8];
+    const MIDDLE_MCP = landmarks[9];
+    const PINKY_TIP = landmarks[20];
 
-    const isThumbsUp = thumbTip.y < thumbBase.y &&
-        indexTip.y > indexBase.y &&
-        middleTip.y > middleBase.y &&
-        ringTip.y > ringBase.y &&
-        pinkyTip.y > pinkyBase.y;
+    // Calculate hand size using wrist to middle finger MCP distance
+    const handSize = Math.hypot(WRIST.x - MIDDLE_MCP.x, WRIST.y - MIDDLE_MCP.y);
+    
+    // Calculate vertical positions relative to wrist
+    const thumbTipVertical = WRIST.y - THUMB_TIP.y;
+    const thumbIPVertical = WRIST.y - THUMB_IP.y;
+    const indexVertical = WRIST.y - INDEX_TIP.y;
+    const pinkyVertical = WRIST.y - PINKY_TIP.y;
 
-    const isThumbsDown = thumbTip.y > thumbBase.y &&
-        indexTip.y > indexBase.y &&
-        middleTip.y > middleBase.y &&
-        ringTip.y > ringBase.y &&
-        pinkyTip.y > pinkyBase.y;
+    // Thumb Up Detection (Improved)
+    const isThumbUp = 
+        thumbTipVertical > handSize * 0.5 && // Thumb tip significantly above wrist
+        (THUMB_TIP.y < THUMB_IP.y) &&       // Thumb tip above thumb joint
+        (INDEX_TIP.y > MIDDLE_MCP.y + handSize * 0.1) && // Fingers closed
+        (PINKY_TIP.y > MIDDLE_MCP.y + handSize * 0.1);
 
+    // Thumb Down Detection
+    const isThumbDown = 
+        (THUMB_TIP.y - WRIST.y) > handSize * 0.4 &&
+        (INDEX_TIP.y - WRIST.y) > handSize * 0.1;
+
+    // Raised Hand Detection
     const isRaisedHand = 
-        thumbTip.y < thumbBase.y &&
-        indexTip.y < indexBase.y &&
-        middleTip.y < middleBase.y &&
-        ringTip.y < ringBase.y &&
-        pinkyTip.y < pinkyBase.y;
+        thumbTipVertical > handSize * 0.2 &&
+        indexVertical > handSize * 0.4 &&
+        pinkyVertical > handSize * 0.4 &&
+        Math.abs(INDEX_TIP.x - PINKY_TIP.x) > handSize * 0.3;
 
-    if (isThumbsUp) return "Thumbs Up";
-    if (isThumbsDown) return "Thumbs Down";
+    if (isThumbUp) return "Thumbs Up";
+    if (isThumbDown) return "Thumbs Down";
     if (isRaisedHand) return "Raised Hand";
 
     return null;
 }
-function stopDetection() {
-    if (camera) {
-        camera.stop();
-        console.log("Camera stopped after detecting gesture.");
-    }
-    if (videoElement) videoElement.remove();
-    if (canvasElement) canvasElement.remove();
-}
 
+function displayGesture(gesture: string | null) {
+    if (!gesture) return;
+    
+    if (!gestureDisplayElement) {
+        gestureDisplayElement = document.createElement('div');
+        gestureDisplayElement.style.position = 'fixed';
+        gestureDisplayElement.style.left = '50%';
+        gestureDisplayElement.style.top = '50%';
+        gestureDisplayElement.style.transform = 'translate(-50%, -50%)';
+        gestureDisplayElement.style.background = 'rgba(0, 0, 0, 0.9)';
+        gestureDisplayElement.style.color = 'white';
+        gestureDisplayElement.style.padding = '25px 40px';
+        gestureDisplayElement.style.borderRadius = '20px';
+        gestureDisplayElement.style.fontSize = '48px';
+        gestureDisplayElement.style.fontWeight = 'bold';
+        gestureDisplayElement.style.textAlign = 'center';
+        gestureDisplayElement.style.zIndex = '9999';
+        gestureDisplayElement.style.boxShadow = '0 0 30px rgba(255,255,255,0.2)';
+        gestureDisplayElement.style.display = 'none';
+        document.body.appendChild(gestureDisplayElement);
+    }
+
+    const emoji = GESTURE_EMOJI_MAP[gesture] || '';
+    gestureDisplayElement.innerHTML = `${emoji}<div style="font-size: 24px; margin-top: 10px">${gesture}</div>`;
+    gestureDisplayElement.style.display = 'block';
+
+    if (gestureDetectionTimeout) clearTimeout(gestureDetectionTimeout);
+    gestureDetectionTimeout = window.setTimeout(() => {
+        if (gestureDisplayElement) {
+            gestureDisplayElement.style.display = 'none';
+        }
+    }, 2000);
+}
 
 async function loadHandModel() {
-    await tf.ready();
     handModel = new Hands({
-        locateFile: (file) => {
-            return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/dist/${file}`;
-        }
+        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
     });
-    
-    // Configure the model after creation
+
     await handModel.setOptions({
-        maxNumHands: 2,
+        maxNumHands: 1,
         modelComplexity: 1,
-        minDetectionConfidence: 0.5,
-        minTrackingConfidence: 0.5
+        minDetectionConfidence: 0.7,
+        minTrackingConfidence: 0.7
     });
-    
+
     handModel.onResults((results) => {
-        processHandResults(results);
-    });
-    console.log('Hand detection model loaded');
-}
+        if (!isDetectionActive || !canvasCtx || !canvasElement) return;
+        
+        canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+        canvasCtx.save();
+        
+        if (results.multiHandLandmarks) {
+            for (const landmarks of results.multiHandLandmarks) {
+                drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS, {
+                    color: '#00FF00',
+                    lineWidth: 2
+                });
+                drawLandmarks(canvasCtx, landmarks, {
+                    color: '#FF0000',
+                    lineWidth: 1,
+                    radius: 2
+                });
 
-async function loadPoseModel() {
-    await tf.ready();
-    poseModel = new Pose({
-        locateFile: (file) => {
-            return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/dist/${file}`;
+                const gesture = detectGesture(landmarks);
+                if (gesture) {
+                    displayGesture(gesture);
+                }
+            }
         }
+        canvasCtx.restore();
     });
-    
-    // Configure the pose model after creation
-    await poseModel.setOptions({
-        modelComplexity: 1,
-        smoothLandmarks: true,
-        enableSegmentation: false,
-        smoothSegmentation: false,
-        minDetectionConfidence: 0.5,
-        minTrackingConfidence: 0.5
-    });
-    
-    poseModel.onResults((results) => {
-        processPoseResults(results);
-    });
-    console.log('Pose detection model loaded');
 }
 
-function processHandResults(results: any) {
-    if (!canvasCtx || !canvasElement || !results.multiHandLandmarks) return;
-
-    canvasCtx.save();
-    canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-    canvasCtx.fillStyle = 'red';
-    canvasCtx.fillRect(10, 10, 50, 50);
-
-    for (const landmarks of results.multiHandLandmarks) {
-        drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS, { color: '#00FF00', lineWidth: 4 });
-
-        const gesture = detectGesture(landmarks);
-        if (gesture) {
-            console.log("Detected gesture:", gesture);
-            stopDetection();
-            break;
-        }
-    }
-
-    canvasCtx.restore();
-}
-
-
-function processPoseResults(results: any) {
-    if (!canvasCtx || !canvasElement) return;
-    
-    canvasCtx.save();
-    canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-    
-    // Draw pose if detected
-    if (results.poseLandmarks) {
-        drawConnectors(canvasCtx, results.poseLandmarks, POSE_CONNECTIONS, 
-            { color: '#FF0000', lineWidth: 4 });
-    }
-    
-    canvasCtx.restore();
-}
-
+// In setupCamera function
 async function setupCamera() {
     try {
-        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            throw new Error('Browser API navigator.mediaDevices.getUserMedia not available');
-        }
-
         const stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: 'user', width: 300, height: 300 },
+            video: {
+                facingMode: 'user',
+                width: { ideal: 320 },  // Reduced resolution
+                height: { ideal: 240 }
+            },
             audio: false
         });
 
+        const cameraContainer = document.createElement('div');
+        cameraContainer.style.position = 'fixed';
+        cameraContainer.style.top = '20px';
+        cameraContainer.style.left = '20px';
+        cameraContainer.style.width = '160px'; 
+        cameraContainer.style.height = '120px'; 
+        cameraContainer.style.borderRadius = '8px';
+        cameraContainer.style.overflow = 'hidden';
+        cameraContainer.style.boxShadow = '0 0 10px rgba(0,0,0,0.3)';
+        cameraContainer.style.zIndex = '10000';
+        cameraContainer.style.backgroundColor = '#000';
+
         videoElement = document.createElement('video');
-        videoElement.srcObject = stream;
-        videoElement.play();
-
-        await new Promise<void>((resolve) => {
-            if (videoElement) {
-                videoElement.onloadedmetadata = () => {
-                    resolve();
-                };
-            }
-        });
-
-        // Setup canvas
-        canvasElement = document.createElement('canvas');
-        canvasElement.width = 300;
-        canvasElement.height = 300;
-        canvasCtx = canvasElement.getContext('2d');
-        
-        // Add elements to the DOM
-        document.body.appendChild(videoElement);
-        document.body.appendChild(canvasElement);
-        
-        // Style elements
-        videoElement.style.position = 'absolute';
-        videoElement.style.left = '20px'; // move video 20px from the left
-        videoElement.style.top = '100px'; // optional: move down to not cover header
         videoElement.style.transform = 'scaleX(-1)';
-        videoElement.style.zIndex = '10';
-        
+        videoElement.style.width = '100%';
+        videoElement.style.height = '100%';
+        videoElement.playsInline = true;
+
+        canvasElement = document.createElement('canvas');
+        canvasElement.style.width = '100%';
+        canvasElement.style.height = '100%';
         canvasElement.style.position = 'absolute';
-        canvasElement.style.left = '20px'; // same left offset
-        canvasElement.style.top = '100px';
-        canvasElement.style.transform = 'scaleX(-1)';
-        canvasElement.style.zIndex = '11';
-        
- // Mirror canvas too
-        
-        if (!canvasCtx) {
-            throw new Error('Could not get 2D rendering context for canvas');
-        }
+        canvasElement.style.top = '0';
+        canvasElement.style.left = '0';
+
+        cameraContainer.appendChild(videoElement);
+        cameraContainer.appendChild(canvasElement);
+        document.body.appendChild(cameraContainer);
+
+        videoElement.srcObject = stream;
+        await new Promise((resolve) => (videoElement.onloadedmetadata = resolve));
+        await videoElement.play();
+
+        canvasElement.width = videoElement.videoWidth;
+        canvasElement.height = videoElement.videoHeight;
+        canvasCtx = canvasElement.getContext('2d');
 
         camera = new Camera(videoElement, {
             onFrame: async () => {
-              console.log("Processing frame...");
-              if (videoElement && handModel) {
-                await handModel.send({ image: videoElement });
-              }
-              if (videoElement && poseModel) {
-                await poseModel.send({ image: videoElement });
-              }
+                if (handModel && isDetectionActive) {
+                    await handModel.send({ image: videoElement });
+                }
             },
-            width: 300,
-            height: 300,
-          });
-          
-        
+            width: videoElement.videoWidth,
+            height: videoElement.videoHeight
+        });
         camera.start();
-        console.log("Camera setup complete");
+
     } catch (error) {
-        console.error("Error during camera setup:", error);
+        console.error("Camera setup failed:", error);
     }
 }
-
-async function init() {
-    try {
-        await loadHandModel();
-        await loadPoseModel();
-        await setupCamera();
-        console.log("Initialization complete");
-    } catch (error) {
-        console.error("Error during initialization:", error);
-    }
-}
-
-// Add an event listener to start initialization when the page is loaded
-//window.addEventListener('DOMContentLoaded', init); //, which is located in src/detection/det.ts
 
 export async function startDetection() {
-    await new Promise((resolve) => setTimeout(resolve, 5000));
-    await init();
-  }
-  
+    if (!isDetectionActive) {
+        isDetectionActive = true;
+        await loadHandModel();
+        await setupCamera();
+    }
+}
+
+export function stopDetection() {
+    isDetectionActive = false;
+}
+
+export function cleanupDetection() {
+    stopDetection();
+    
+    if (camera) {
+        camera.stop();
+        camera = null;
+    }
+    
+    const cameraContainer = document.querySelector('div[style*="bottom: 20px"]');
+    if (cameraContainer) cameraContainer.remove();
+
+    if (videoElement) {
+        (videoElement.srcObject as MediaStream)?.getTracks().forEach(track => track.stop());
+        videoElement.remove();
+        videoElement = null;
+    }
+
+    if (canvasElement) {
+        canvasElement.remove();
+        canvasElement = null;
+        canvasCtx = null;
+    }
+
+    if (gestureDisplayElement) {
+        gestureDisplayElement.remove();
+        gestureDisplayElement = null;
+    }
+
+    if (gestureDetectionTimeout) {
+        clearTimeout(gestureDetectionTimeout);
+        gestureDetectionTimeout = null;
+    }
+
+    handModel = null;
+}
