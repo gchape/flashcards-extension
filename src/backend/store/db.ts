@@ -11,12 +11,26 @@ const db = new Low<DBData>(adapter, { cards: init() });
 function init(): BucketMap {
   const map: BucketMap = new Map();
 
+  function shuffleArray<T>(array: T[]): T[] {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  }
+  
   const initialCards = [
     new Flashcard("What is the capital of France?", "Paris", "City of Light"),
     new Flashcard("Who wrote '1984'?", "George Orwell", "Dystopian novel"),
+    new Flashcard("Do two trees create the forest?", "Yes", "Marcus Lecture"),
+    new Flashcard("The tallest waterfall in the world is'?", "Anchel waterfall", "It is located in Venezuela"),
+    new Flashcard("In which year was FC Shukura Kobuleti founded'?", "1968", "Both Kennedy and Gagarin died that year "),
+    new Flashcard("Capital of the Kosovo is", "[Null]", "Listen to your heart")
+   
   ];
 
-  map.set(0, new Set(initialCards));
+  const shuffledCards = shuffleArray(initialCards);
+  map.set(0, new Set(shuffledCards));
   return map;
 }
 
