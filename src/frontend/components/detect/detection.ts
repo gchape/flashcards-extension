@@ -18,30 +18,26 @@ const GESTURE_EMOJI_MAP: Record<string, string> = {
     "Raised Hand": "✋"
 };
 
-// Detects gestures based on hand landmarks and returns the gesture name
 function detectGesture(landmarks: any): string | null {
-
     const WRIST = landmarks[0];
     const THUMB_TIP = landmarks[4];
-    const THUMB_IP = landmarks[3]; // Thumb interphalangeal joint
+    const THUMB_IP = landmarks[3];
     const INDEX_TIP = landmarks[8];
     const MIDDLE_MCP = landmarks[9];
     const PINKY_TIP = landmarks[20];
 
-    // Calculate hand size using wrist to middle finger MCP distance
     const handSize = Math.hypot(WRIST.x - MIDDLE_MCP.x, WRIST.y - MIDDLE_MCP.y);
     
-    // Calculate vertical positions relative to wrist
     const thumbTipVertical = WRIST.y - THUMB_TIP.y;
     const thumbIPVertical = WRIST.y - THUMB_IP.y;
     const indexVertical = WRIST.y - INDEX_TIP.y;
     const pinkyVertical = WRIST.y - PINKY_TIP.y;
 
-    // Thumb Up Detection (Improved)
+    // Thumb Up Detection
     const isThumbUp = 
-        thumbTipVertical > handSize * 0.5 && // Thumb tip significantly above wrist
-        (THUMB_TIP.y < THUMB_IP.y) &&       // Thumb tip above thumb joint
-        (INDEX_TIP.y > MIDDLE_MCP.y + handSize * 0.1) && // Fingers closed
+        thumbTipVertical > handSize * 0.5 &&
+        (THUMB_TIP.y < THUMB_IP.y) &&
+        (INDEX_TIP.y > MIDDLE_MCP.y + handSize * 0.1) &&
         (PINKY_TIP.y > MIDDLE_MCP.y + handSize * 0.1);
 
     // Thumb Down Detection
@@ -60,12 +56,11 @@ function detectGesture(landmarks: any): string | null {
     if (isThumbDown) return "Thumbs Down";
     if (isRaisedHand) return "Raised Hand";
 
-    return "Not detected";
+    return null;
 }
 
 function displayGesture(gesture: string | null) {
-    if (!gesture) return;
-    
+    // Create display element if it doesn't exist
     if (!gestureDisplayElement) {
         gestureDisplayElement = document.createElement('div');
         gestureDisplayElement.style.position = 'fixed';
@@ -83,8 +78,15 @@ function displayGesture(gesture: string | null) {
         gestureDisplayElement.style.boxShadow = '0 0 30px rgba(255,255,255,0.2)';
         gestureDisplayElement.style.display = 'none';
         document.body.appendChild(gestureDisplayElement);
-        const event = new CustomEvent('gestureDetected', { detail: gesture });
-        window.dispatchEvent(event);
+    }
+
+    // Always dispatch detection event
+    const event = new CustomEvent('gestureDetected', { detail: gesture });
+    window.dispatchEvent(event);
+
+    if (!gesture) {
+        gestureDisplayElement.style.display = 'none';
+        return;
     }
 
     const emoji = GESTURE_EMOJI_MAP[gesture] || '';
@@ -130,25 +132,19 @@ async function loadHandModel() {
                 });
 
                 const gesture = detectGesture(landmarks);
-                if (gesture) {
-                    displayGesture(gesture);
-                }
+                displayGesture(gesture);
             }
-
         }
         canvasCtx.restore();
     });
-
 }
-
-// In setupCamera function
 
 async function setupCamera() {
     try {
         const stream = await navigator.mediaDevices.getUserMedia({
             video: {
                 facingMode: 'user',
-                width: { ideal: 320 },  // Reduced resolution
+                width: { ideal: 320 },
                 height: { ideal: 240 }
             },
             audio: false
@@ -158,8 +154,8 @@ async function setupCamera() {
         cameraContainer.style.position = 'fixed';
         cameraContainer.style.top = '20px';
         cameraContainer.style.left = '20px';
-        cameraContainer.style.width = '160px'; 
-        cameraContainer.style.height = '120px'; 
+        cameraContainer.style.width = '160px';
+        cameraContainer.style.height = '120px';
         cameraContainer.style.borderRadius = '8px';
         cameraContainer.style.overflow = 'hidden';
         cameraContainer.style.boxShadow = '0 0 10px rgba(0,0,0,0.3)';
@@ -173,7 +169,6 @@ async function setupCamera() {
         videoElement.playsInline = true;
 
         canvasElement = document.createElement('canvas');
-
         canvasElement.style.width = '100%';
         canvasElement.style.height = '100%';
         canvasElement.style.position = 'absolute';
@@ -185,21 +180,19 @@ async function setupCamera() {
         document.body.appendChild(cameraContainer);
 
         videoElement.srcObject = stream;
-        await new Promise((resolve) => (videoElement.onloadedmetadata = resolve));
+        await new Promise((resolve) => (videoElement!.onloadedmetadata = resolve));
         await videoElement.play();
 
         canvasElement.width = videoElement.videoWidth;
         canvasElement.height = videoElement.videoHeight;
         canvasCtx = canvasElement.getContext('2d');
 
-
         camera = new Camera(videoElement, {
             onFrame: async () => {
                 if (handModel && isDetectionActive) {
-                    await handModel.send({ image: videoElement });
+                    await handModel.send({ image: videoElement! });
                 }
             },
-
             width: videoElement.videoWidth,
             height: videoElement.videoHeight
         });
@@ -213,7 +206,6 @@ async function setupCamera() {
 export async function startDetection() {
     if (!isDetectionActive) {
         isDetectionActive = true;
-
         await loadHandModel();
         await setupCamera();
     }
@@ -231,11 +223,11 @@ export function cleanupDetection() {
         camera = null;
     }
     
-    const cameraContainer = document.querySelector('div[style*="bottom: 20px"]');
+    const cameraContainer = document.querySelector('div[style*="top: 20px"]');
     if (cameraContainer) cameraContainer.remove();
 
     if (videoElement) {
-        (videoElement.srcObject as MediaStream)?.getTracks().forEach(track => track.stop());
+        videoElement.srcObject?.getTracks().forEach(track => track.stop());
         videoElement.remove();
         videoElement = null;
     }
@@ -257,5 +249,4 @@ export function cleanupDetection() {
     }
 
     handModel = null;
-    
 }
