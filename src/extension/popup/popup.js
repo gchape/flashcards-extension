@@ -34,3 +34,21 @@ document.getElementById("add-card-form").addEventListener("submit", (e) => {
     }
   })();
 });
+
+document
+  .getElementById("start-flashcards-btn")
+  .addEventListener("click", () => {
+    // If in development mode, open localhost for always-fresh build
+    const devUrl = "http://localhost:5173/";
+    
+    fetch(devUrl, { method: "HEAD" })
+      .then(() => {
+        // Localhost is running → use it
+        chrome.tabs.create({ url: devUrl });
+      })
+      .catch(() => {
+        // Localhost not running → fallback to packaged flashcards.html
+        const packagedUrl = chrome.runtime.getURL("flashcards/flashcards.html");
+        chrome.tabs.create({ url: packagedUrl });
+      });
+  });

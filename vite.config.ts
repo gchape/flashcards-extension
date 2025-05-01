@@ -17,9 +17,8 @@ export default defineConfig({
           src: 'dist/assets/*',
           dest: 'extension/flashcards/assets'
         }
-      ],
-      flatten: false
-    })
+      ]
+    }) // ⬅ flatten removed
   ],
   build: {
     outDir: 'dist',
