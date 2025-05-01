@@ -29,15 +29,20 @@ export function ActionBar({
     ws.onopen = () => console.log("WebSocket connection established");
 
     // Handles incoming WebSocket messages
-    ws.onmessage = (event: MessageEvent<any>) => {
+    ws.onmessage = async (event: MessageEvent<any>) => {
       const message = JSON.parse(event.data);
       if (message.type === "new-card") {
         const flashcard: Flashcard = message.card;
 
-        updateFlashcard({
-          flashcard: flashcard,
+        await updateFlashcard({
+          flashcard: new Flashcard(
+            flashcard.front,
+            flashcard.back,
+            flashcard.hint,
+            flashcard.tags[0] ? flashcard.tags : undefined
+          ),
           difficulty: AnswerDifficulty.Easy,
-        }); // Updates the db with the new card
+        });
 
         console.log("New Card received", flashcard);
       }

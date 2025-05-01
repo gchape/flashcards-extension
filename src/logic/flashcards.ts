@@ -6,7 +6,12 @@ export class Flashcard {
   readonly hint?: string;
   readonly tags: ReadonlyArray<string>;
 
-  constructor(front: string, back: string, hint?: string, tags: ReadonlyArray<string> = []) {
+  constructor(
+    front: string,
+    back: string,
+    hint?: string,
+    tags: ReadonlyArray<string> = []
+  ) {
     this.id = crypto.randomUUID();
     this.front = front.trim();
     this.back = back.trim();
@@ -24,18 +29,16 @@ export class Flashcard {
     if (!this.back) {
       throw new Error("back side must have an answer.");
     }
-    
-    if (this.hint !== undefined && this.hint.length === 0) {
-      throw new Error("hint must not be empty.");
-    }
-    
-    if (!Array.isArray(this.tags)) {
-      throw new Error("tags must be an array.");
-    }
-    
-    for (const t of this.tags) {
-      if (typeof t !== "string" || t.trim() === "") {
-        throw new Error("tags must be non-empty strings.");
+
+    if (this.tags != undefined) {
+      if (!Array.isArray(this.tags)) {
+        throw new Error("tags must be an array.");
+      }
+
+      for (const t of this.tags) {
+        if (typeof t !== "string" || t.trim() === "") {
+          throw new Error("tags must be non-empty strings.");
+        }
       }
     }
   }
