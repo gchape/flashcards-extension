@@ -9,7 +9,7 @@ type FlashcardProps = {
   day: number;
   showAnswer: boolean;
   currentCard: React.RefObject<Record<number, Flashcard>>;
-  setCurrentCardsCount: React.Dispatch<React.SetStateAction<number>>;
+  setCardsLeft: React.Dispatch<React.SetStateAction<number>>;
   setShowAnswer: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
@@ -17,7 +17,7 @@ export default function Card({
   day,
   showAnswer,
   currentCard,
-  setCurrentCardsCount,
+  setCardsLeft,
   setShowAnswer,
 }: FlashcardProps) {
   const [index, setIndex] = useState(0);
@@ -38,7 +38,7 @@ export default function Card({
       };
 
       if (difficultyMap[gesture]) {
-        setDetectedDifficulty(difficultyMap[gesture]);
+        setDetectedDifficulty(() => difficultyMap[gesture]);
 
         // Update flashcard difficulty in DB
         const updatedCards = [...todayCards];
@@ -72,35 +72,39 @@ export default function Card({
         const cards_ = await getFlashcards();
         const todayCards_ = cards_.get(0);
 
-        todayCards_ && setTodayCards(Array.from(todayCards_));
+        todayCards_ && setTodayCards(() => Array.from(todayCards_));
       } else {
         const cards_ = await getFlashcards();
 
-        setTodayCards(Array.from(practice(day, toBucketsSets(cards_))));
+        setTodayCards(() => Array.from(practice(day, toBucketsSets(cards_))));
       }
     };
 
     getTodayCards();
+    setIndex(() => 0);
   }, [day]);
 
   // Update cards count
   useEffect(() => {
-    setCurrentCardsCount(todayCards.length);
-  }, [todayCards, setCurrentCardsCount]);
+    setCardsLeft(() => todayCards.length);
+  }, [todayCards]);
 
   // Handle next question navigation
   const moveToNextQuestion = () => {
-    setShowAnswer(false);
-    setDetectedDifficulty(null);
+    setShowAnswer(() => false);
+    setDetectedDifficulty(() => null);
+
     setIndex((prev) => {
       if (todayCards.length === 0) return prev;
-      return prev < todayCards.length - 1 ? prev + 1 : 0;
+      return prev + 1;
     });
+
+    setCardsLeft((prev) => prev - 1);
   };
 
   // Reset detection when index changes
   useEffect(() => {
-    setDetectedDifficulty(null);
+    setDetectedDifficulty(() => null);
   }, [index]);
 
   if (!todayCards.length || index >= todayCards.length) {

@@ -7,8 +7,8 @@ import { Flashcard } from "../logic/flashcards";
 
 export default function App() {
   const [day, setDay] = useState(0);
+  const [cardsLeft, setCardsLeft] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
-  const [currentCardsCount, setCurrentCardsCount] = useState(0);
 
   const currentCard = useRef<Record<number, Flashcard>>([]);
 
@@ -19,15 +19,15 @@ export default function App() {
         day={day}
         showAnswer={showAnswer}
         currentCard={currentCard}
+        setCardsLeft={setCardsLeft}
         setShowAnswer={setShowAnswer}
-        setCurrentCardsCount={setCurrentCardsCount}
       />
       <ActionBar
         setDay={setDay}
+        cardsLeft={cardsLeft}
         showAnswer={showAnswer}
         currentCard={currentCard}
         setShowAnswer={setShowAnswer}
-        currentCardsCount={currentCardsCount}
       />
     </Main>
   );

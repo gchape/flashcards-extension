@@ -7,7 +7,7 @@ import Footer from "./Footer";
 // Props for the ActionBar component
 type ActionBarProps = {
   showAnswer: boolean; // Indicates whether the answer is currently being shown
-  currentCardsCount: number; // Number of flashcards remaining for the current day
+  cardsLeft: number; // Number of flashcards remaining for the current day
   setDay: React.Dispatch<React.SetStateAction<number>>; // Function to update the current day
   currentCard: React.RefObject<Record<number, Flashcard>>; // Reference to the current flashcard
   setShowAnswer: React.Dispatch<React.SetStateAction<boolean>>; // Function to toggle the answer visibility
@@ -19,7 +19,7 @@ export function ActionBar({
   showAnswer, // Determines if the answer is shown
   currentCard, // Reference to the current flashcard
   setShowAnswer, // Toggles the answer visibility
-  currentCardsCount, // Number of flashcards left for the day
+  cardsLeft: currentCardsCount, // Number of flashcards left for the day
 }: ActionBarProps) {
   // Establishes a WebSocket connection to listen for real-time updates
   useEffect(() => {

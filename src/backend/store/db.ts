@@ -52,7 +52,7 @@ function init(): BucketMap {
     ),
     new Flashcard(
       "Capital of the Kosovo is",
-      "[Null]",
+      "Pristina",
       "Listen to your heart",
       undefined
     ),
