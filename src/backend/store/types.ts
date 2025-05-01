@@ -1,15 +1,12 @@
-import { AnswerDifficulty, Flashcard, BucketMap } from "../../logic/flashcards";
+import { AnswerDifficulty, BucketMap, Flashcard } from "../../logic/flashcards";
 
-export type FlashcardsAction =
-  | { type: "SET_STATE"; newState: BucketMap }
-  | { type: "PRACTICE_CARDS"; day: number }; // optional, for future use
+// Type representing the database structure
+export type DBData = {
+  cards: BucketMap;
+};
 
-export type FlashcardsState = {
-  flashcards: BucketMap;
-  update: (
-    buckets: BucketMap,
-    card: Flashcard,
-    difficulty: AnswerDifficulty
-  ) => BucketMap;
-  practice: (day: number, buckets: Set<Flashcard>[]) => Set<Flashcard>;
+// Type for the properties passed to the `saveFlashcard` function
+export type SaveFlashcardProps = {
+  flashcard: Flashcard;
+  difficulty: AnswerDifficulty;
 };
