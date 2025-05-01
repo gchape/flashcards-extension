@@ -18,15 +18,44 @@ function init(): BucketMap {
     }
     return array;
   }
-  
+
   const initialCards = [
-    new Flashcard("What is the capital of France?", "Paris", "City of Light"),
-    new Flashcard("Who wrote '1984'?", "George Orwell", "Dystopian novel"),
-    new Flashcard("Do two trees create the forest?", "Yes", "Marcus Lecture"),
-    new Flashcard("The tallest waterfall in the world is'?", "Anchel waterfall", "It is located in Venezuela"),
-    new Flashcard("In which year was FC Shukura Kobuleti founded'?", "1968", "Both Kennedy and Gagarin died that year "),
-    new Flashcard("Capital of the Kosovo is", "[Null]", "Listen to your heart")
-   
+    new Flashcard(
+      "What is the capital of France?",
+      "Paris",
+      "City of Light",
+      undefined
+    ),
+    new Flashcard(
+      "Who wrote '1984'?",
+      "George Orwell",
+      "Dystopian novel",
+      undefined
+    ),
+    new Flashcard(
+      "Do two trees create the forest?",
+      "Yes",
+      "Marcus Lecture",
+      undefined
+    ),
+    new Flashcard(
+      "The tallest waterfall in the world is'?",
+      "Anchel waterfall",
+      "It is located in Venezuela",
+      undefined
+    ),
+    new Flashcard(
+      "In which year was FC Shukura Kobuleti founded'?",
+      "1968",
+      "Both Kennedy and Gagarin died that year ",
+      undefined
+    ),
+    new Flashcard(
+      "Capital of the Kosovo is",
+      "[Null]",
+      "Listen to your heart",
+      undefined
+    ),
   ];
 
   const shuffledCards = shuffleArray(initialCards);
