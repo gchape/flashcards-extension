@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { AnswerDifficulty, Flashcard } from "../../logic/flashcards";
 import Button from "./Button";
+import { updateFlashcard } from "../../backend/store/db";
 import Footer from "./Footer";
-import { useFlashcardsContext } from "../../backend/store/flashcards-context";
 
 // Props for the ActionBar component
 type ActionBarProps = {
@@ -21,8 +21,6 @@ export function ActionBar({
   setShowAnswer, // Toggles the answer visibility
   currentCardsCount, // Number of flashcards left for the day
 }: ActionBarProps) {
-  const ctx = useFlashcardsContext(); // Access the flashcards context for state management
-
   // Establishes a WebSocket connection to listen for real-time updates
   useEffect(() => {
     const ws = new WebSocket("ws://localhost:4000");
@@ -35,7 +33,11 @@ export function ActionBar({
       const message = JSON.parse(event.data);
       if (message.type === "new-card") {
         const flashcard: Flashcard = message.card;
-        ctx.update(ctx.flashcards, flashcard, AnswerDifficulty.Easy); // Updates the flashcards context with the new card
+
+        updateFlashcard({
+          flashcard: flashcard,
+          difficulty: AnswerDifficulty.Easy,
+        }); // Updates the db with the new card
 
         console.log("New Card received", flashcard);
       }
@@ -56,8 +58,9 @@ export function ActionBar({
       text="Go to Next Day"
       onClick={() => setDay((prev) => prev + 1)}
     />
-  ) 
-   : (
+  ) : showAnswer ? (
+    <Footer />
+  ) : (
     // If the answer is not being shown, display buttons for getting a hint or showing the answer
     <div style={{ display: "flex", gap: "20px" }}>
       <Button
